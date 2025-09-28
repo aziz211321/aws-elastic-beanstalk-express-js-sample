@@ -12,14 +12,26 @@ pipeline {
             }
         }
         
-        stage('Install & Test') {
+        stage('Install Dependencies') {
             steps {
                 sh 'npm install --save'
+            }
+        }
+        
+        stage('Run Unit Tests') {
+            steps {
                 sh 'npm test'
             }
         }
         
-        stage('Build Docker') {
+        stage('Security Scan') {
+            steps {
+                sh 'npm install -g snyk'
+                sh 'snyk test --severity-threshold=high || echo "Security scan completed - continuing build"'
+            }
+        }
+        
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t my-node-app .'
             }
