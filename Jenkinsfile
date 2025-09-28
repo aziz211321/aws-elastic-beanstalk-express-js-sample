@@ -1,13 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:16'
-            args '-u root:root'
-        }
-    }
-    environment {
-        DOCKER_IMAGE = 'abdulaziz2009/my-node-app'
-    }
+    agent any
     stages {
         stage('Checkout') {
             steps {
@@ -21,37 +13,16 @@ pipeline {
             }
         }
         
-        stage('Run Unit Tests') {
+        stage('Test') {
             steps {
                 sh 'npm test'
             }
         }
         
-        stage('Security Scan') {
-            steps {
-                sh 'npm install -g snyk'
-                sh 'snyk test --severity-threshold=high || true'
-            }
-        }
-        
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("my-node-app:${env.BUILD_ID}")
-                }
+                sh 'docker build -t my-node-app .'
             }
-        }
-    }
-    
-    post {
-        always {
-            echo 'Pipeline completed. Check logs for details.'
-        }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
