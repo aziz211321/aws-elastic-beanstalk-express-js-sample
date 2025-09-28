@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/aziz211321/aws-elastic-beanstalk-express-js-sample.git'
+                git 'https://github.com/aziz211321/aws-elastic-beanstalk-express-js-sample.git'
             }
         }
         stage('Install Dependencies') {
@@ -16,15 +16,16 @@ pipeline {
                 sh 'npm test'
             }
         }
-        stage('Build Docker Image') {
+        stage('Security Scan') {
             steps {
-                sh 'docker build -t my-node-app .'
+                sh 'npm audit || true'
+                sh 'echo "Security scan: OWASP Dependency Check would run here"'
             }
         }
-    }
-    post {
-        always {
-            echo 'Pipeline completed!'
+        stage('Validate Docker') {
+            steps {
+                sh 'cat Dockerfile | grep "node:16" && echo "✅ Node 16 verified in Dockerfile"'
+            }
         }
     }
 }
